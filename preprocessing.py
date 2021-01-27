@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import re
+import numpy as np
 from sklearn.model_selection import train_test_split
 
 import nltk
@@ -14,22 +15,10 @@ from nltk.stem import SnowballStemmer
 
 from collections import Counter
 from wordcloud import WordCloud
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 
+from collections import defaultdict
 
-df = pd.read_csv("twitter_data.csv" , encoding='latin-1')
-df.columns=['Sentiment', 'id', 'Date', 'Query', 'User', 'Tweet']
-df = df.drop(columns=['id', 'Date', 'Query', 'User'], axis=1)
-
-#0: negative sentiment, 1:positive sentiment
-df['Sentiment'] = df['Sentiment'].apply(lambda x: 0 if x == 0 else 1)
-
-df = df.copy().sample(8000, random_state=42)
-
-#contractins in english language
-contractions = pd.read_csv('contractions.csv', index_col='Contraction')
-contractions.index = contractions.index.str.lower()
-contractions.Meaning = contractions.Meaning.str.lower()
-contractions_dict = contractions.to_dict()['Meaning']
 
 def preprocess_apply(tweet):
 
@@ -41,9 +30,7 @@ def preprocess_apply(tweet):
 
     urlPattern = r"((http://)[^ ]*|(https://)[^ ]*|(www\.)[^ ]*)"
     userPattern = '@[^\s]+'
-    hashtagPattern = '#[^\s]+'
     alphaPattern = "[^a-z0-9<>]"
-    sequencePattern = r"(.)\1\1+"
     seqReplacePattern = r"\1\1"
 
     tweet = tweet.lower()
@@ -112,20 +99,6 @@ def lemmatize_sentence(text):
     return " ".join(lemmatized_sentence)
 
 
-df['processed_tweet'] = df.Tweet.apply(preprocess_apply)
-df.processed_tweet = df.processed_tweet.apply(lemmatize_sentence)
-
-df['Words'] = df['processed_tweet'].apply(lambda x:str(x).split())
-
-#most frequent positive words
-top_pos = Counter([word for text in df[df['Sentiment']==1]['Words'] for word in text])
-top_pos_df=pd.DataFrame(top_pos.most_common(15),columns=['Words','Counts'])
-#print(top_pos_df)
-
-#most frequent negative words
-top_neg = Counter([word for text in df[df['Sentiment']==0]['Words'] for word in text])
-top_neg_df=pd.DataFrame(top_pos.most_common(15),columns=['Words','Counts'])
-#print(top_neg_df)
 
 def word_cloud(array_text, color='white'):
     """
@@ -144,10 +117,72 @@ def word_cloud(array_text, color='white'):
     plt.show()
 
 
-#word clouds
+def co_occurrence(sentences, window_size):
+    d = defaultdict(int)
+    vocab = set()
+    for text in sentences:
 
-#wc_pos = word_cloud(top_pos)
-#wc_neg = word_cloud(top_neg, 'black')
+        text = text.lower().split()
+        for i in range(len(text)):
+            token = text[i]
+            vocab.add(token)
+            next_token = text[i + 1: i + 1 + window_size]
+            for t in next_token:
+                key = tuple(sorted([t, token]))
+                d[key] += 1
+
+    vocab = sorted(vocab)
+    df = pd.DataFrame(data=np.zeros((len(vocab), len(vocab)), dtype=np.int16),
+                      index=vocab,
+                      columns=vocab)
+    for key, value in d.items():
+        df.at[key[0], key[1]] = value
+        df.at[key[1], key[0]] = value
+    return df
+
+
+if __name__ == "__main__":
+
+    df = pd.read_csv("twitter_data.csv", encoding='latin-1')
+    df.columns = ['Sentiment', 'id', 'Date', 'Query', 'User', 'Tweet']
+    df = df.drop(columns=['id', 'Date', 'Query', 'User'], axis=1)
+
+    # 0: negative sentiment, 1:positive sentiment
+    df['Sentiment'] = df['Sentiment'].apply(lambda x: 0 if x == 0 else 1)
+
+    df = df.copy().sample(8000, random_state=42)
+
+    # contractins in english language
+    contractions = pd.read_csv('contractions.csv', index_col='Contraction')
+    contractions.index = contractions.index.str.lower()
+    contractions.Meaning = contractions.Meaning.str.lower()
+    contractions_dict = contractions.to_dict()['Meaning']
+
+    df['processed_tweet'] = df.Tweet.apply(preprocess_apply)
+    df.processed_tweet = df.processed_tweet.apply(lemmatize_sentence)
+
+    df['Words'] = df['processed_tweet'].apply(lambda x: str(x).split())
+
+    # most frequent positive words
+    top_pos = Counter([word for text in df[df['Sentiment'] == 1]['Words'] for word in text])
+    top_pos_df = pd.DataFrame(top_pos.most_common(15), columns=['Words', 'Counts'])
+    # print(top_pos_df)
+
+    # most frequent negative words
+    top_neg = Counter([word for text in df[df['Sentiment'] == 0]['Words'] for word in text])
+    top_neg_df = pd.DataFrame(top_pos.most_common(15), columns=['Words', 'Counts'])
+    # print(top_neg_df)
+
+    #word clouds
+
+    #wc_pos = word_cloud(top_pos)
+    #wc_neg = word_cloud(top_neg, 'black')
+
+    #co_occurrence_matrix = co_occurrence(list(df['processed_tweet']), 2)
+    #co_occurrence_matrix.to_csv('co_occurence_matrix.csv', sep='\t', encoding='utf-8')
+
+
+
 
 
 
