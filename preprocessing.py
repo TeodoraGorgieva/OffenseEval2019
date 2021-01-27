@@ -23,8 +23,9 @@ df = df.drop(columns=['id', 'Date', 'Query', 'User'], axis=1)
 #0: negative sentiment, 1:positive sentiment
 df['Sentiment'] = df['Sentiment'].apply(lambda x: 0 if x == 0 else 1)
 
-df = df[:-100]
+df = df.copy().sample(8000, random_state=42)
 
+#contractins in english language
 contractions = pd.read_csv('contractions.csv', index_col='Contraction')
 contractions.index = contractions.index.str.lower()
 contractions.Meaning = contractions.Meaning.str.lower()
@@ -49,9 +50,8 @@ def preprocess_apply(tweet):
     # transform url adress to "url" token
     tweet = re.sub(urlPattern, 'url', tweet)
     # transform each @username to "at_user" token
-    tweet = re.sub(userPattern, 'at_user', tweet)
-    # Replace 3 or more consecutive letters by 2 letter.
-    tweet = re.sub(sequencePattern, seqReplacePattern, tweet)
+    tweet = re.sub(userPattern, 'atuser', tweet)
+
     # transform hastags ex: #love to "love" token
     tweet = tweet.replace("#", "")
 
@@ -113,18 +113,41 @@ def lemmatize_sentence(text):
 
 
 df['processed_tweet'] = df.Tweet.apply(preprocess_apply)
-df.processed_tweet = df.processed_tweet.apply(stemSentence)
+df.processed_tweet = df.processed_tweet.apply(lemmatize_sentence)
 
-#print(df['processed_tweet'][:5])
+df['Words'] = df['processed_tweet'].apply(lambda x:str(x).split())
 
-processedtext = list(df['processed_tweet'])
-#data_pos = processedtext[800000:]
-#data_neg = processedtext[:800000]
+#most frequent positive words
+top_pos = Counter([word for text in df[df['Sentiment']==1]['Words'] for word in text])
+top_pos_df=pd.DataFrame(top_pos.most_common(15),columns=['Words','Counts'])
+#print(top_pos_df)
 
-wc = WordCloud(max_words = 20 , width = 1600 , height = 800,
-              collocations=False).generate(" ".join(processedtext))
-plt.figure(figsize = (20,20))
-plt.imshow(wc)
-plt.show()
+#most frequent negative words
+top_neg = Counter([word for text in df[df['Sentiment']==0]['Words'] for word in text])
+top_neg_df=pd.DataFrame(top_pos.most_common(15),columns=['Words','Counts'])
+#print(top_neg_df)
+
+def word_cloud(array_text, color='white'):
+    """
+    Function to generate word_cloud
+    :param array_text:
+    :param color:
+    :return:
+    """
+
+    wc = WordCloud(max_words=100,
+                   background_color=color,
+                   width=1600, height=800,
+                   collocations=False).generate(" ".join(array_text))
+    plt.figure(figsize=(20, 20))
+    plt.imshow(wc)
+    plt.show()
+
+
+#word clouds
+
+#wc_pos = word_cloud(top_pos)
+#wc_neg = word_cloud(top_neg, 'black')
+
 
 
