@@ -37,7 +37,7 @@ from sklearn.metrics import mean_absolute_error
 if __name__ == '__main__':
 
     tweets = pd.read_csv('tweets.csv', '\t', encoding='latin-1')
-    train = tweets.copy().sample(1000, random_state=42)
+    train = tweets.copy().sample(10000, random_state=42)
     test = pd.read_csv('test_tweets.csv', encoding='latin-1')
 
     X_train = train['processed_tweet'].values.astype('U')
@@ -45,7 +45,7 @@ if __name__ == '__main__':
     y_train = train['Sentiment']
     y_test = test['Sentiment']
 
-    tv = TfidfVectorizer(min_df=0, max_df=1, use_idf=True, ngram_range=(1, 2))
+    tv = TfidfVectorizer(max_features=2000, min_df=5, max_df=0.7, use_idf=True, ngram_range=(1, 2))
     tv_X_train = tv.fit_transform(X_train)
     tv_X_test = tv.transform(X_test)
 
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     print(f"Gaussian Bayes F1 score: ", f1_score(y_test, y_predicted, average=None))
 
 
-    clf_knn = KNeighborsClassifier(n_neighbors=31)
+    clf_knn = KNeighborsClassifier(n_neighbors=3)
     clf_knn.fit(tv_X_train, y_train)
     y_predicted = clf_knn.predict(tv_X_test)
     print(f"KNN accuracy: {accuracy_score(y_test, y_predicted)}")
@@ -87,4 +87,3 @@ if __name__ == '__main__':
     print(f"Linear Regression  precision: ", precision_score(y_test, y_predicted, average=None))
     print(f"Linear Regression  recall score: ", recall_score(y_test, y_predicted, average=None))
     print(f"Linear Regression  F1 score: ", f1_score(y_test, y_predicted, average=None))
-
