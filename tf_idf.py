@@ -82,18 +82,9 @@ if __name__ == '__main__':
 
     lr = LogisticRegression(penalty='l2', max_iter=500, C=1, random_state=42)
     lr_tfidf = lr.fit(tv_X_train, y_train)
-    lr_tfidf_predict = lr.predict(tv_X_test)
-    lr_tfidf_score = accuracy_score(y_test, lr_tfidf_predict)
+    y_predicted = lr.predict(tv_X_test)
     print(f"Linear Regression accuracy: {accuracy_score(y_test, y_predicted)}")
     print(f"Linear Regression  precision: ", precision_score(y_test, y_predicted, average=None))
     print(f"Linear Regression  recall score: ", recall_score(y_test, y_predicted, average=None))
     print(f"Linear Regression  F1 score: ", f1_score(y_test, y_predicted, average=None))
-
-
-
-
-
-
-
-
 
