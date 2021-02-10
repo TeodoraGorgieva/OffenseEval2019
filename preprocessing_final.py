@@ -1,26 +1,22 @@
-import numpy as np
 import re
 import string
-import nltk
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
-from nltk.tokenize import TweetTokenizer
-from nltk.stem.wordnet import WordNetLemmatizer
-from emoji.core import demojize
-import num2words
-import emoji
 
-from symspellpy.symspellpy import SymSpell, Verbosity
 import pandas as pd
+from emoji.core import demojize
+from nltk.corpus import stopwords
+from nltk.stem.wordnet import WordNetLemmatizer
+from nltk.tokenize import TweetTokenizer
+from symspellpy.symspellpy import SymSpell, Verbosity
 
 
 def process_tweets(tweets_column):
-    #tweets_column = tweets_column.apply(lambda x: emoji.demojize(x, delimiters=(" ", " ")))
+    # tweets_column = tweets_column.apply(lambda x: emoji.demojize(x, delimiters=(" ", " ")))
 
     tweets_column = tweets_column.apply(
         lambda x: ' '.join(re.sub(r"(@[A-Za-z0-9]+)|^rt |(\w+:\/*\S+)|[^a-zA-Z\s]", "", x).split()))
 
     return tweets_column
+
 
 def process_tweet(tweet,
                   remove_USER_URL=True,
@@ -54,7 +50,6 @@ def process_tweet(tweet,
             tweet = re.sub(r"@USER", "<usertoken>", tweet)
             tweet = re.sub(r"URL", "<urltoken>", tweet)
 
-
     ### REMOVE HASHTAGS? #####################################################
     if remove_hashtags:
         tweet = re.sub(r'#\w+ ?', '', tweet)
@@ -84,7 +79,7 @@ def process_tweet(tweet,
     tweet = re.sub(r"j k", "jk", tweet)
     tweet = re.sub(r"\s{2,}", " ", tweet)
 
-    tweet = emoji.demojize(tweet, delimiters=(" ", " "))
+    tweet = demojize(tweet, delimiters=(" ", " "))
 
     ### Remove Punctuation ###################################################
     if remove_punctuation:
@@ -96,15 +91,23 @@ def process_tweet(tweet,
     words = tokenizer.tokenize(tweet)
 
     ### Apostrophe handling:    you're   -> you are  ########################
-    APPO = {"aren't": "are not", "can't": "cannot", "couldn't": "could not", "didn't": "did not", "doesn't": "does not", "don't": "do not",
-            "hadn't": "had not", "hasn't": "has not", "haven't": "have not", "he'd": "he would", "he'll": "he will", "he's": "he is",
+    APPO = {"aren't": "are not", "can't": "cannot", "couldn't": "could not", "didn't": "did not", "doesn't": "does not",
+            "don't": "do not",
+            "hadn't": "had not", "hasn't": "has not", "haven't": "have not", "he'd": "he would", "he'll": "he will",
+            "he's": "he is",
             "i'd": "I would", "i'll": "I will", "i'm": "I am", "isn't": "is not", "it's": "it is", "it'll": "it will",
-            "i've": "I have", "let's": "let us", "mightn't": "might not", "mustn't": "must not", "shan't": "shall not", "she'd": "she would",
-            "she'll": "she will", "she's": "she is", "shouldn't": "should not", "that's": "that is", "there's": "there is", "they'd": "they would",
-            "they'll": "they will", "they're": "they are", "they've": "they have", "we'd": "we would", "we're": "we are", "weren't": "were not",
-            "we've": "we have", "what'll": "what will", "what're": "what are", "what's": "what is", "what've": "what have", "where's": "where is",
-            "who'd": "who would", "who'll": "who will", "who're": "who are", "who's": "who is", "who've": "who have", "won't": "will not",
-            "wouldn't": "would not", "you'd": "you would", "you'll": "you will", "you're": "you are", "you've": "you have", "'re": " are",
+            "i've": "I have", "let's": "let us", "mightn't": "might not", "mustn't": "must not", "shan't": "shall not",
+            "she'd": "she would",
+            "she'll": "she will", "she's": "she is", "shouldn't": "should not", "that's": "that is",
+            "there's": "there is", "they'd": "they would",
+            "they'll": "they will", "they're": "they are", "they've": "they have", "we'd": "we would",
+            "we're": "we are", "weren't": "were not",
+            "we've": "we have", "what'll": "what will", "what're": "what are", "what's": "what is",
+            "what've": "what have", "where's": "where is",
+            "who'd": "who would", "who'll": "who will", "who're": "who are", "who's": "who is", "who've": "who have",
+            "won't": "will not",
+            "wouldn't": "would not", "you'd": "you would", "you'll": "you will", "you're": "you are",
+            "you've": "you have", "'re": " are",
             "wasn't": "was not", "we'll": " will"}
     if appostrophe_handling:
         words = [APPO[word] if word in APPO else word for word in words]
@@ -131,7 +134,7 @@ def process_tweet(tweet,
 
         ### Segment words:    thecatonthemat -> the cat on the mat ####################
         if segment_words:
-            words = [sym_spell.word_segmentation(word,).corrected_string for word in words]
+            words = [sym_spell.word_segmentation(word, ).corrected_string for word in words]
 
         ### Correct spelling: birberals -> liberals ######################
         if correct_spelling:
@@ -161,11 +164,10 @@ params = dict(remove_USER_URL=False,
               correct_spelling=True,
               remove_hashtags=True,
               sym_spell=None,
-        )
+              )
 
 
 def setA():
-
     data = pd.read_csv("olid-training-v1.0.tsv", sep='\t')
     data = data[['tweet', 'subtask_a']]
 
@@ -178,13 +180,13 @@ def setA():
 
 
 def setB():
-
     data = pd.read_csv("olid-training-v1.0.tsv", sep='\t')
     data = data[['tweet', 'subtask_b']]
 
     data['subtask_b'] = data['subtask_b'].fillna("NULL")
-    mapper = {'UNT': 0, 'TIN': 1}
+    mapper = {'UNT': 0, 'TIN': 1, 'NULL': 'NULL'}
     data['subtask_b'] = data.subtask_b.map(mapper)
+    data = data.loc[data['subtask_b'] != 'NULL']
 
     data['tweet'] = process_tweets(data['tweet'])
     data['tweet'] = data['tweet'].apply(lambda x: process_tweet(x, **params, trial=False))
@@ -193,13 +195,13 @@ def setB():
 
 
 def setC():
-
     data = pd.read_csv("olid-training-v1.0.tsv", sep='\t')
     data = data[['tweet', 'subtask_c']]
 
     data['subtask_c'] = data['subtask_c'].fillna("NULL")
-    mapper = {'IND': 0, 'OTH': 1, 'GRP': 2}
+    mapper = {'IND': 0, 'OTH': 1, 'GRP': 2, 'NULL': 'NULL'}
     data['subtask_c'] = data.subtask_c.map(mapper)
+    data = data.loc[data['subtask_c'] != 'NULL']
 
     data['tweet'] = process_tweets(data['tweet'])
     data['tweet'] = data['tweet'].apply(lambda x: process_tweet(x, **params, trial=False))
@@ -207,11 +209,6 @@ def setC():
 
 
 if __name__ == "__main__":
-
     setA()
     setB()
     setC()
-
-
-
-

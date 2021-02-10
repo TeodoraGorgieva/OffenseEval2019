@@ -1,38 +1,10 @@
 import pandas as pd
-import matplotlib.pyplot as plt
-import re
-import numpy as np
-from sklearn.model_selection import train_test_split
-
-import nltk
-from nltk.corpus import stopwords
-import string
-from nltk.corpus import wordnet as wn
-
-from nltk.stem import WordNetLemmatizer
-from nltk import pos_tag
-from nltk.stem import SnowballStemmer
-
-from collections import Counter
-from wordcloud import WordCloud
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
-
-from collections import defaultdict
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.preprocessing import StandardScaler
-
-from sklearn.svm import SVC
-from sklearn.naive_bayes import GaussianNB
-from sklearn.metrics import accuracy_score
-from sklearn.neighbors import KNeighborsClassifier
-
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-from sklearn.metrics import classification_report
-from sklearn.metrics import confusion_matrix, plot_confusion_matrix
-from sklearn.metrics import r2_score
-from sklearn.metrics import mean_absolute_error
-
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
 
 
 if __name__ == '__main__':

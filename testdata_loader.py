@@ -12,7 +12,7 @@ from nltk.corpus import wordnet
 from nltk.corpus import stopwords
 import string
 
-from proprocessing_final import process_tweets, process_tweet
+from preprocessing_final import process_tweets, process_tweet
 
 
 params = dict(remove_USER_URL=False,
