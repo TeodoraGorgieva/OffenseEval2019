@@ -34,18 +34,18 @@ from sklearn.metrics import r2_score
 from sklearn.metrics import mean_absolute_error
 
 
+
 if __name__ == '__main__':
+    train = pd.read_csv('train_taskA.csv', ',')
+    train = train.copy().sample(1000, random_state=42)
+    test = pd.read_csv('test_taskA.csv')
 
-    tweets = pd.read_csv('tweets.csv', '\t', encoding='latin-1')
-    train = tweets.copy().sample(10000, random_state=42)
-    test = pd.read_csv('test_tweets.csv', encoding='latin-1')
+    X_train = train['tweet'].values.astype('U')
+    X_test = test['tweet'].values.astype('U')
+    y_train = train['subtask_a']
+    y_test = test['label']
 
-    X_train = train['processed_tweet'].values.astype('U')
-    X_test = test['processed_tweet'].values.astype('U')
-    y_train = train['Sentiment']
-    y_test = test['Sentiment']
-
-    tv = TfidfVectorizer(max_features=2000, min_df=5, max_df=0.7, use_idf=True, ngram_range=(1, 2))
+    tv = TfidfVectorizer(max_features=2000, min_df=5, max_df=0.7, use_idf=True, ngram_range=(2, 7))
     tv_X_train = tv.fit_transform(X_train)
     tv_X_test = tv.transform(X_test)
 
@@ -59,31 +59,30 @@ if __name__ == '__main__':
     clf.fit(tv_X_train, y_train)
     y_predicted = clf.predict(tv_X_test)
     print(f"SVM accuracy: {accuracy_score(y_test, y_predicted)}")
-    print(f"SVM precision: ", precision_score(y_test, y_predicted, average=None))
-    print(f"SVM recall score: ", recall_score(y_test, y_predicted, average=None))
-    print(f"SVM F1 score: ", f1_score(y_test, y_predicted, average=None))
+    print(f"SVM precision: ", precision_score(y_test, y_predicted, average='macro'))
+    print(f"SVM recall score: ", recall_score(y_test, y_predicted, average='macro'))
+    print(f"SVM F1 score: ", f1_score(y_test, y_predicted, average='macro'))
 
     gnb = GaussianNB([0, 1])
     gnb.fit(tv_X_train, y_train)
     y_predicted = gnb.predict(tv_X_test)
     print(f"Gaussian Bayes accuracy: {accuracy_score(y_test, y_predicted)}")
-    print(f"Gaussian Bayes precision: ", precision_score(y_test, y_predicted, average=None))
-    print(f"Gaussian Bayes recall score: ", recall_score(y_test, y_predicted, average=None))
-    print(f"Gaussian Bayes F1 score: ", f1_score(y_test, y_predicted, average=None))
-
+    print(f"Gaussian Bayes precision: ", precision_score(y_test, y_predicted, average='macro'))
+    print(f"Gaussian Bayes recall score: ", recall_score(y_test, y_predicted, average='macro'))
+    print(f"Gaussian Bayes F1 score: ", f1_score(y_test, y_predicted, average='macro'))
 
     clf_knn = KNeighborsClassifier(n_neighbors=3)
     clf_knn.fit(tv_X_train, y_train)
     y_predicted = clf_knn.predict(tv_X_test)
     print(f"KNN accuracy: {accuracy_score(y_test, y_predicted)}")
-    print(f"KNN  precision: ", precision_score(y_test, y_predicted, average=None))
-    print(f"KNN  recall score: ", recall_score(y_test, y_predicted, average=None))
-    print(f"KNN  F1 score: ", f1_score(y_test, y_predicted, average=None))
+    print(f"KNN  precision: ", precision_score(y_test, y_predicted, average='macro'))
+    print(f"KNN  recall score: ", recall_score(y_test, y_predicted, average='macro'))
+    print(f"KNN  F1 score: ", f1_score(y_test, y_predicted, average='macro'))
 
     lr = LogisticRegression(penalty='l2', max_iter=500, C=1, random_state=42)
     lr_tfidf = lr.fit(tv_X_train, y_train)
     y_predicted = lr.predict(tv_X_test)
     print(f"Linear Regression accuracy: {accuracy_score(y_test, y_predicted)}")
-    print(f"Linear Regression  precision: ", precision_score(y_test, y_predicted, average=None))
-    print(f"Linear Regression  recall score: ", recall_score(y_test, y_predicted, average=None))
-    print(f"Linear Regression  F1 score: ", f1_score(y_test, y_predicted, average=None))
+    print(f"Linear Regression  precision: ", precision_score(y_test, y_predicted, average='macro'))
+    print(f"Linear Regression  recall score: ", recall_score(y_test, y_predicted, average='macro'))
+    print(f"Linear Regression  F1 score: ", f1_score(y_test, y_predicted, average='macro'))
