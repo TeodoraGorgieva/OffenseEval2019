@@ -30,13 +30,13 @@ params = dict(remove_USER_URL=False,
 
 if __name__ == "__main__":
 
-    testdataA = pd.read_csv("testset-levela.tsv", delimiter='\t')
-    testdataB = pd.read_csv("testset-levelb.tsv", delimiter='\t')
-    testdataC = pd.read_csv("testset-levelc.tsv", delimiter='\t')
+    testdataA = pd.read_csv("../dataset/testset-levela.tsv", delimiter='\t')
+    testdataB = pd.read_csv("../dataset/testset-levelb.tsv", delimiter='\t')
+    testdataC = pd.read_csv("../dataset/testset-levelc.tsv", delimiter='\t')
 
-    labelsA = pd.read_csv("labels-levela.csv", header=None, names=['id', 'label'])
-    labelsB = pd.read_csv("labels-levelb.csv", header=None, names=['id', 'label'])
-    labelsC = pd.read_csv("labels-levelc.csv", header=None, names=['id', 'label'])
+    labelsA = pd.read_csv("../dataset/labels-levela.csv", header=None, names=['id', 'label'])
+    labelsB = pd.read_csv("../dataset/labels-levelb.csv", header=None, names=['id', 'label'])
+    labelsC = pd.read_csv("../dataset/labels-levelc.csv", header=None, names=['id', 'label'])
 
     testdataA['tweet'] = process_tweets(testdataA['tweet'])
     testdataA['tweet'] = testdataA['tweet'].apply(lambda x: process_tweet(x, **params, trial=False))
