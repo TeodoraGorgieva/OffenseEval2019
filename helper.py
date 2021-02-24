@@ -1,31 +1,13 @@
-import pandas as pd
-import numpy as np
-import nltk
-
-# Sci-kit learn
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score
-from sklearn.metrics import classification_report
-from sklearn.metrics import roc_auc_score, f1_score
-import seaborn as sns
-
-# Keras
-from keras.preprocessing.text import Tokenizer
-from keras.preprocessing.sequence import pad_sequences
-from keras.models import Sequential
-from keras.layers import Dense, Flatten, LSTM, Conv1D, MaxPooling1D, Dropout, Activation
-from keras.layers.embeddings import Embedding
-
-from sklearn.metrics import roc_auc_score, f1_score
-from keras.preprocessing.text import Tokenizer
-from keras.preprocessing.sequence import pad_sequences
-from keras.models import Model, Sequential
-from keras.layers.embeddings import Embedding
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+# Sci-kit learn
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score
+from sklearn.metrics import f1_score
 
 
 def longest_subsequence(data, character, data_column):
-
     """Finds the length of the longest sequence of a character in a tweet.
     INPUTS: data - dataframe containing the dataset
             character - the character whose longest sequence the function will output for each document in the dataset
@@ -48,7 +30,6 @@ def longest_subsequence(data, character, data_column):
 
 
 def prepare_embedding_matrix(vocabulary_size, tokenizer):
-
     """Maps the vocabulary of the dataset to English GloVe embeddings pretrained on Twitter data."""
 
     embeddings_index = dict()
@@ -72,7 +53,6 @@ def prepare_embedding_matrix(vocabulary_size, tokenizer):
     return embedding_matrix
 
 
-
 def calculate_metrics(y_test, y_predicted):
     """
     function to calculate metrics
@@ -85,7 +65,6 @@ def calculate_metrics(y_test, y_predicted):
 
 
 def plot_graph_loss(file_name, model_name):
-
     values = pd.read_table(file_name, sep=',')
     data = pd.DataFrame()
     data['epoch'] = list(values['epoch'].get_values() + 1) + \
@@ -106,13 +85,12 @@ def plot_graph_loss(file_name, model_name):
 
 
 def confusion_matrix(y_train, y_predicted):
-
     cm = confusion_matrix(y_train, y_predicted)
     cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-    #print(cm)
+    # print(cm)
+
 
 def confusion_matrix_plot(cm, title='Confusion matrix', cmap=plt.cm.Blues, labels=[]):
-
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
     plt.colorbar()
